@@ -44,18 +44,26 @@ export default function Page() {
     ReadableTitle: string;
   } | null>(null);
 
-  // Check for the ?pre_input_blob_url query parameter
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const preInputBlobUrl = urlParams.get("pre_input_blob_url");
 
+    console.log("URL Parameters:", urlParams.toString());
+    console.log("pre_input_blob_url:", preInputBlobUrl);
+
     if (preInputBlobUrl) {
       fetch(preInputBlobUrl)
-        .then((response) => response.blob())
+        .then((response) => {
+          console.log("Fetched blob URL response:", response);
+          return response.blob();
+        })
         .then((blob) => {
+          console.log("Fetched Blob:", blob);
+
           // Convert the blob to a base64 string
           const reader = new FileReader();
           reader.onloadend = () => {
+            console.log("Base64 result:", reader.result);
             setImage(reader.result as string); // Use the base64 string in your logic
           };
           reader.readAsDataURL(blob); // Converts blob to base64
