@@ -165,7 +165,7 @@ export default function FriendManagement({
         <Label className="p-2 text-xl font-semibold">Friend Management</Label>
         <AddFriendInput />
       </div>
-      <div className="p-2">
+      <div className="flex flex-col gap-2 p-2">
         {friend_list_data ? (
           friend_list_data?.length > 0 ? (
             friend_list_data?.map((friend_data) => (
