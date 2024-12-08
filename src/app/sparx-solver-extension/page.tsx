@@ -45,37 +45,33 @@ export default function Page() {
   } | null>(null);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const preInputBlobUrl = urlParams.get("pre_input_blob_url");
-
-    console.log("URL Parameters:", urlParams.toString());
-    console.log("pre_input_blob_url:", preInputBlobUrl);
-
-    const handleMessage = (event: { origin: string; data: unknown }) => {
+    // Function to handle the message
+    const handleMessage = (event: {
+      origin: string;
+      data: { base64Image: never };
+    }) => {
+      // Ensure the message is coming from the expected source for security
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (event.origin !== "https://your-extension-origin.com") {
-        // Check the correct origin for security
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const blob = event.data; // Get the Blob from the event
+      // Access the base64 image data from the message
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const { base64Image } = event.data;
 
-      if (blob) {
-        // Now, you can process the blob directly (no need to fetch it)
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          console.log("Base64 result:", reader.result);
-          setImage(reader.result as string); // Use the base64 string in your logic
-        };
-        // @ts-expect-error uhuhuhuhuu
+      if (base64Image) {
+        // Now you can use the base64 image in your logic, e.g., display it
+        console.log("Received base64 image:", base64Image);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        reader.readAsDataURL(blob); // Converts blob to base64
+        setImage(base64Image); // Assuming you have a setImage function to display the image
       }
     };
 
     // Add event listener to receive messages
     window.addEventListener("message", handleMessage);
 
+    // Clean up the event listener when the component unmounts
     return () => {
       window.removeEventListener("message", handleMessage);
     };
