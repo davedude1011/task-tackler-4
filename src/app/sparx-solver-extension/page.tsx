@@ -50,12 +50,6 @@ export default function Page() {
       origin: string;
       data: { base64Image: never };
     }) => {
-      // Ensure the message is coming from the expected source for security
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (event.origin !== "https://your-extension-origin.com") {
-        return;
-      }
-
       // Access the base64 image data from the message
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { base64Image } = event.data;
