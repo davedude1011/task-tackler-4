@@ -44,6 +44,28 @@ export default function Page() {
     ReadableTitle: string;
   } | null>(null);
 
+  // Check for the ?pre_input_blob_url query parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const preInputBlobUrl = urlParams.get("pre_input_blob_url");
+
+    if (preInputBlobUrl) {
+      fetch(preInputBlobUrl)
+        .then((response) => response.blob())
+        .then((blob) => {
+          // Convert the blob to a base64 string
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImage(reader.result as string); // Use the base64 string in your logic
+          };
+          reader.readAsDataURL(blob); // Converts blob to base64
+        })
+        .catch((error) => {
+          console.error("Error fetching the blob URL:", error);
+        });
+    }
+  }, []);
+
   useEffect(() => {
     if (image) {
       set_response_data(null);
