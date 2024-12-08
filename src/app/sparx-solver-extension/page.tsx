@@ -51,27 +51,34 @@ export default function Page() {
     console.log("URL Parameters:", urlParams.toString());
     console.log("pre_input_blob_url:", preInputBlobUrl);
 
-    if (preInputBlobUrl) {
-      fetch(preInputBlobUrl)
-        .then((response) => {
-          console.log("Fetched blob URL response:", response);
-          return response.blob();
-        })
-        .then((blob) => {
-          console.log("Fetched Blob:", blob);
+    const handleMessage = (event: { origin: string; data: unknown }) => {
+      if (event.origin !== "https://your-extension-origin.com") {
+        // Check the correct origin for security
+        return;
+      }
 
-          // Convert the blob to a base64 string
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            console.log("Base64 result:", reader.result);
-            setImage(reader.result as string); // Use the base64 string in your logic
-          };
-          reader.readAsDataURL(blob); // Converts blob to base64
-        })
-        .catch((error) => {
-          console.error("Error fetching the blob URL:", error);
-        });
-    }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const blob = event.data; // Get the Blob from the event
+
+      if (blob) {
+        // Now, you can process the blob directly (no need to fetch it)
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          console.log("Base64 result:", reader.result);
+          setImage(reader.result as string); // Use the base64 string in your logic
+        };
+        // @ts-expect-error uhuhuhuhuu
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        reader.readAsDataURL(blob); // Converts blob to base64
+      }
+    };
+
+    // Add event listener to receive messages
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
   }, []);
 
   useEffect(() => {
