@@ -9,6 +9,7 @@ import {
 } from "~/server/sparx-solver-server";
 
 import { MathJax, MathJaxContext } from "better-react-mathjax";
+import { useTheme } from "next-themes";
 
 function generate_random_number_string(length = 19): string {
   let random_number_string = "";
@@ -55,6 +56,7 @@ export default function Page() {
       const { base64Image } = event.data;
 
       if (base64Image) {
+        console.log(`AUTO-FILL REQUEST ORIGIN: ${event.origin}`);
         // Now you can use the base64 image in your logic, e.g., display it
         console.log("Received base64 image:", base64Image);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -185,6 +187,21 @@ export default function Page() {
         });
     }
   }, [image]);
+
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    // Read the 'theme' parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeFromUrl = urlParams.get("theme");
+
+    // Set the theme to the value from the URL, or default to 'light'
+    if (themeFromUrl) {
+      setTheme(themeFromUrl); // Assuming 'setTheme' can handle 'light' or 'dark'
+    } else {
+      setTheme("light"); // Default to light if no theme is specified
+    }
+  }, [setTheme]);
 
   if (image) {
     return (
