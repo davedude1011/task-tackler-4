@@ -1,5 +1,13 @@
 "use server"
 
+function generate_random_number_string(length = 19): string {
+  let random_number_string = "";
+  for (let i = 0; i < length; i++) {
+    random_number_string += Math.floor(Math.random() * 10); // Generate a random digit from 0 to 9
+  }
+  return random_number_string;
+}
+
 export async function upload_image(device_id: string, base64_image: string) {
     try {
       // Decode base64 string to binary data
@@ -92,7 +100,7 @@ export async function get_answer(device_id: string, question_id: string) {
                         "agw-js-conv": "str",
                     },
                     referrer: "https://www.gauthmath.com/",
-                    body: `{\"SolutionUrl\":\"${question_id}\",\"WebSolutionScene\":4,\"RequestId\":\"1733338124816\"}`,
+                    body: `{\"SolutionUrl\":\"${question_id}\",\"WebSolutionScene\":4,\"RequestId\":\"${generate_random_number_string(13)}\"}`,
                 },
             );
 
@@ -102,7 +110,7 @@ export async function get_answer(device_id: string, question_id: string) {
 
             // Check for valid response data and desired content
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (response_data?.WebSolution?.ContentInfo?.Answer?.length > 1) {
+            if (response_data?.WebSolution?.ContentInfo?.Answer?.length > 0) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return response_data;
             }
