@@ -3,9 +3,12 @@
 
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
+  json,
   pgTableCreator,
+  text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -18,19 +21,39 @@ import {
  */
 export const createTable = pgTableCreator((name) => `task-tackler-4_${name}`);
 
-export const posts = createTable(
-  "post",
+export const users = createTable(
+  "users",
   {
     id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
-    name: varchar("name", { length: 256 }),
+
+    clerkId: text("clerk_id"),
+    userId: text("user_id"), // word.word
+    isSpecial: boolean("is_special"),
+    friendIds: json("friend_ids"),
+
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
       () => new Date()
     ),
-  },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
-  })
+  }
+);
+
+export const messages = createTable(
+  "messages",
+  {
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+
+    userOneId: text("user_one_id"),
+    userTwoId: text("user_two_id"),
+    content: json("content"),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date()
+    ),
+  }
 );

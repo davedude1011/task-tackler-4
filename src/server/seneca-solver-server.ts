@@ -1,3 +1,5 @@
+"use server"
+
 async function get_signed_url(url_id_a: string, url_id_b: string) {
     try {
         const response = await fetch(

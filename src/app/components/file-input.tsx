@@ -1,4 +1,4 @@
-import { Copy, FileInputIcon } from "lucide-react";
+import { FileInputIcon } from "lucide-react";
 
 interface FileInputProps {
   image: string | null;
@@ -45,6 +45,7 @@ const FileInput: React.FC<FileInputProps> = ({ image, setImage }) => {
       onClick={() => document.getElementById("fileInput")?.click()}
     >
       {image ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={image}
           alt="Preview"
@@ -52,8 +53,8 @@ const FileInput: React.FC<FileInputProps> = ({ image, setImage }) => {
         />
       ) : (
         <>
-          <FileInputIcon size={48} className="opacity-25" />
-          <div className="font-thin">
+          <FileInputIcon size={48} className="dark:opacity-25" />
+          <div className="dark:font-thin">
             Paste your image here or click to upload
           </div>
         </>

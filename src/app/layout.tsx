@@ -5,6 +5,8 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "~/components/ui/sonner";
+import UserAuth from "./user-auth";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -25,7 +27,8 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <UserAuth>{children}</UserAuth>
+            <Toaster />
           </ThemeProvider>
         </body>
       </html>
