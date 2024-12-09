@@ -10,6 +10,7 @@ import {
 
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 import { useTheme } from "next-themes";
+import { Button } from "~/components/ui/button";
 
 function generate_random_number_string(length = 19): string {
   let random_number_string = "";
@@ -46,30 +47,24 @@ export default function Page() {
   } | null>(null);
 
   useEffect(() => {
-    // Function to handle the message
-    const handleMessage = (event: {
-      origin: string;
-      data: { base64Image: never };
-    }) => {
-      // Access the base64 image data from the message
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const { base64Image } = event.data;
+    // Define the event handler function
+    const handle_message = (
+      message: MessageEvent<{ type: string; message: string }>,
+    ) => {
+      if (message?.data.type === "sparx_solver_response_base_64") {
+        console.log("RESPONDED");
+        console.log(message?.data.message);
 
-      if (base64Image) {
-        console.log(`AUTO-FILL REQUEST ORIGIN: ${event.origin}`);
-        // Now you can use the base64 image in your logic, e.g., display it
-        console.log("Received base64 image:", base64Image);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        setImage(base64Image); // Assuming you have a setImage function to display the image
+        setImage(message?.data.message);
       }
     };
 
-    // Add event listener to receive messages
-    window.addEventListener("message", handleMessage);
+    // Attach the event listener
+    window.addEventListener("message", handle_message);
 
     // Clean up the event listener when the component unmounts
     return () => {
-      window.removeEventListener("message", handleMessage);
+      window.removeEventListener("message", handle_message);
     };
   }, []);
 
@@ -263,9 +258,16 @@ export default function Page() {
   } else {
     return (
       <div className="flex h-screen flex-col">
-        <div className="flex flex-grow flex-col items-center justify-center">
+        <div className="flex flex-grow flex-col items-center justify-center gap-2">
           {/* Pass setImage to the FileInput component */}
           <FileInput image={image} setImage={setImage} />
+          <Button
+            onClick={() => {
+              window.postMessage({ type: "sparx_solver_request_base_64" }, "*");
+            }}
+          >
+            Auto answer (from sparx)
+          </Button>
         </div>
       </div>
     );
