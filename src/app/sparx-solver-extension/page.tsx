@@ -47,43 +47,25 @@ export default function Page() {
   } | null>(null);
 
   useEffect(() => {
-    // Function to handle the message
-    const handleMessage = (event: {
-      origin: string;
-      data: { base64Image: never };
-    }) => {
-      // Access the base64 image data from the message
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const { base64Image } = event.data;
+    // Function to handle the message from the parent window
+    const handleMessage = (
+      message: MessageEvent<{ type: string; message: string }>,
+    ) => {
+      if (message?.data.type === "sparx_solver_response_base_64") {
+        console.log("RESPONDED");
+        console.log(message?.data.message);
 
-      if (base64Image) {
-        console.log(`AUTO-FILL REQUEST ORIGIN: ${event.origin}`);
-        // Now you can use the base64 image in your logic, e.g., display it
-        console.log("Received base64 image:", base64Image);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        setImage(base64Image); // Assuming you have a setImage function to display the image
+        // Assuming `setImage` is used to display or process the image
+        setImage(message?.data.message);
       }
     };
 
-    // Add event listener to receive messages
-    window.addEventListener("message", handleMessage);
-
-    window.addEventListener(
-      "message",
-      (message: MessageEvent<{ type: string; message: string }>) => {
-        if (message?.data.type == "sparx_solver_response_base_64") {
-          console.log("REPONDED");
-          console.log(message?.data.message);
-
-          // @ts-expect-error jdiojhsdio
-          setImage(message?.data);
-        }
-      },
-    );
+    // Add event listener to receive messages from the parent window
+    window.parent.addEventListener("message", handleMessage);
 
     // Clean up the event listener when the component unmounts
     return () => {
-      window.removeEventListener("message", handleMessage);
+      window.parent.removeEventListener("message", handleMessage);
     };
   }, []);
 
