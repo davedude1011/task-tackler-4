@@ -47,25 +47,21 @@ export default function Page() {
   } | null>(null);
 
   useEffect(() => {
-    // Function to handle the message from the parent window
-    const handleMessage = (
-      message: MessageEvent<{ type: string; message: string }>,
-    ) => {
-      if (message?.data.type === "sparx_solver_response_base_64") {
-        console.log("RESPONDED");
-        console.log(message?.data.message);
-
-        // Assuming `setImage` is used to display or process the image
-        setImage(message?.data.message);
+    const handleMessage = (event: {
+      origin: string;
+      data: { type: string; message: string };
+    }) => {
+      if (event.data.type == "sparx_solver_response_base_64") {
+        console.log(`AUTO-FILL REQUEST ORIGIN: ${event.origin}`);
+        console.log("Received base64 image:", event.data.message);
+        setImage(event.data.message);
       }
     };
 
-    // Add event listener to receive messages from the parent window
-    window.parent.addEventListener("message", handleMessage);
+    window.addEventListener("message", handleMessage);
 
-    // Clean up the event listener when the component unmounts
     return () => {
-      window.parent.removeEventListener("message", handleMessage);
+      window.removeEventListener("message", handleMessage);
     };
   }, []);
 
