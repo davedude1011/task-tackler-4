@@ -47,24 +47,43 @@ export default function Page() {
   } | null>(null);
 
   useEffect(() => {
-    // Define the event handler function
-    const handle_message = (
-      message: MessageEvent<{ type: string; message: string }>,
-    ) => {
-      if (message?.data.type === "sparx_solver_response_base_64") {
-        console.log("RESPONDED");
-        console.log(message?.data.message);
+    // Function to handle the message
+    const handleMessage = (event: {
+      origin: string;
+      data: { base64Image: never };
+    }) => {
+      // Access the base64 image data from the message
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const { base64Image } = event.data;
 
-        setImage(message?.data.message);
+      if (base64Image) {
+        console.log(`AUTO-FILL REQUEST ORIGIN: ${event.origin}`);
+        // Now you can use the base64 image in your logic, e.g., display it
+        console.log("Received base64 image:", base64Image);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        setImage(base64Image); // Assuming you have a setImage function to display the image
       }
     };
 
-    // Attach the event listener
-    window.addEventListener("message", handle_message);
+    // Add event listener to receive messages
+    window.addEventListener("message", handleMessage);
+
+    window.addEventListener(
+      "message",
+      (message: MessageEvent<{ type: string; message: string }>) => {
+        if (message?.data.type == "sparx_solver_response_base_64") {
+          console.log("REPONDED");
+          console.log(message?.data.message);
+
+          // @ts-expect-error jdiojhsdio
+          setImage(message?.data);
+        }
+      },
+    );
 
     // Clean up the event listener when the component unmounts
     return () => {
-      window.removeEventListener("message", handle_message);
+      window.removeEventListener("message", handleMessage);
     };
   }, []);
 
@@ -263,7 +282,10 @@ export default function Page() {
           <FileInput image={image} setImage={setImage} />
           <Button
             onClick={() => {
-              window.postMessage({ type: "sparx_solver_request_base_64" }, "*");
+              window.parent.postMessage(
+                { type: "sparx_solver_request_base_64" },
+                "*",
+              );
             }}
           >
             Auto answer (from sparx)
