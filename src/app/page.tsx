@@ -1,7 +1,7 @@
-import { ThemeButton } from "~/components/ui/theme-button";
 import NavBar from "./components/navbar";
 import { Button } from "~/components/ui/button";
-import { Chrome, Download } from "lucide-react";
+import { Download } from "lucide-react";
+import Link from "next/link";
 
 export default function Page() {
   return (
@@ -11,12 +11,20 @@ export default function Page() {
         <div className="text-9xl">Task-Tackler</div>
         <div className="italic">v4 is now released :]</div>
         <div className="flex flex-row gap-2 pt-8">
-          <Button>
-            <Download /> Download
-          </Button>
-          <Button variant={"outline"}>
-            <Download /> Github
-          </Button>
+          <Link
+            href={
+              "https://chromewebstore.google.com/detail/task-tackler/knmelikahkhldfnmafmlikolknhekkmp"
+            }
+          >
+            <Button>
+              <Download /> Download
+            </Button>
+          </Link>
+          <Link href={"https://github.com/davedude1011/task-tackler-4"}>
+            <Button variant={"outline"}>
+              <Download /> Github
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
