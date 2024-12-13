@@ -105,6 +105,8 @@ export default function Page() {
         </div>
         <div className="flex flex-grow flex-row gap-4 p-4">
           <div className="flex flex-grow flex-col gap-4 rounded-md border p-4">
+            <div>COMING SOON</div>
+            {/*
             <div className="flex flex-col gap-2">
               <Label className="text-xl font-semibold">Sparx Maths</Label>
               <SettingsSwitch
@@ -150,6 +152,7 @@ export default function Page() {
                 icon={<PenLineIcon size={18} />}
               />
             </div>
+            */}
           </div>
           <FriendCombined />
         </div>
