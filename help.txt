@@ -1,0 +1,2 @@
+git push task-tackler-website main
+git push origin main

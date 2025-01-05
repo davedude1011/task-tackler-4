@@ -1,6 +1,7 @@
 "use server"
 
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from 'chrome-aws-lambda';
 
 function generate_random_number_string(length = 19): string {
   let random_number_string = "";
@@ -135,35 +136,41 @@ export async function get_answer(device_id: string, question_id: string) {
 export async function get_answer_website(question_id: string) {
   console.log(question_id);
 
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    
-    // Navigate to the page
-    await page.goto(`https://www.gauthmath.com/search-question?questionID=${question_id}&action=image_search`);
+  // Launch browser using chrome-aws-lambda's executable path
+  const browser = await puppeteer.launch({
+    executablePath: await chromium.executablePath,  // Use the correct executable path for Vercel
+    headless: true,  // Headless is required on Vercel
+    args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],  // Needed for serverless environments
+  });
 
-    try {
-      // Wait for the element to appear (max 10 seconds)
-      await page.waitForSelector('[class^="PCCacheAnswer_answerInfo"]', { timeout: 10000 });
+  const page = await browser.newPage();
 
-      // Extract the element's HTML
-      const elementHtml = await page.$eval('[class^="PCCacheAnswer_answerInfo"]', el => {
-        // Create a temporary div and assign the HTML
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = el.outerHTML;
-        
-        // Remove the footer if it exists
-        const footerElement = tempDiv.querySelector('[class^="PCCacheAnswer_card-footer"]');
-        if (footerElement) {
-          footerElement.remove();
-        }
+  // Navigate to the page
+  await page.goto(`https://www.gauthmath.com/search-question?questionID=${question_id}&action=image_search`);
+
+  try {
+    // Wait for the element to appear (max 10 seconds)
+    await page.waitForSelector('[class^="PCCacheAnswer_answerInfo"]', { timeout: 10000 });
+
+    // Extract the element's HTML
+    const elementHtml = await page.$eval('[class^="PCCacheAnswer_answerInfo"]', el => {
+      // Create a temporary div and assign the HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = el.outerHTML;
       
-        return tempDiv.innerHTML;  // Return the cleaned-up HTML
-      });
+      // Remove the footer if it exists
+      const footerElement = tempDiv.querySelector('[class^="PCCacheAnswer_card-footer"]');
+      if (footerElement) {
+        footerElement.remove();
+      }
+    
+      return tempDiv.innerHTML;  // Return the cleaned-up HTML
+    });
 
-      return elementHtml;
-    } catch (error) {
-      console.error('Element not found within the timeout', error);
-    } finally {
-      await browser.close();
-    }
+    return elementHtml;
+  } catch (error) {
+    console.error('Element not found within the timeout', error);
+  } finally {
+    await browser.close();
+  }
 }
