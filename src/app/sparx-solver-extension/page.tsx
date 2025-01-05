@@ -5,7 +5,7 @@ import FileInput from "../components/file-input";
 import {
   generate_answer,
   get_answer,
-  get_answer_website,
+  //get_answer_website,
   upload_image,
 } from "~/server/sparx-solver-server";
 
@@ -128,7 +128,7 @@ export default function Page() {
                       console.log("STAGE 2");
                       console.log(generate_response);
 
-                      if (retry_side == 1) {
+                      if (retry_side == 1 || retry_side == 0) {
                         get_answer(
                           temp_device_id,
                           generate_response.questionID ??
@@ -170,6 +170,7 @@ export default function Page() {
                             console.error(error);
                           });
                       } else {
+                        /*
                         get_answer_website(
                           generate_response.questionID ??
                             generate_response.questionIDStr,
@@ -211,6 +212,7 @@ export default function Page() {
                           .catch((error) => {
                             console.error(error);
                           });
+                          */
                       }
                     }
                   },
@@ -306,6 +308,8 @@ export default function Page() {
           {/* Pass setImage to the FileInput component */}
           <FileInput image={image} setImage={setImage} />
           <div className="flex w-full flex-row gap-2">
+            {/*
+              
             <Button
               variant={"outline"}
               onClick={() => {
@@ -318,6 +322,7 @@ export default function Page() {
             >
               Auto (API)
             </Button>
+              */}
             <Button
               className="flex-grow"
               onClick={() => {

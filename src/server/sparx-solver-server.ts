@@ -1,7 +1,9 @@
 "use server"
 
+/*
 import puppeteer from 'puppeteer-core';
 import chromium from 'chrome-aws-lambda';
+*/
 
 function generate_random_number_string(length = 19): string {
   let random_number_string = "";
@@ -132,7 +134,7 @@ export async function get_answer(device_id: string, question_id: string) {
     console.error("Failed to get a valid answer after 20 attempts.");
     return null;
 }
-
+/*
 export async function get_answer_website(question_id: string) {
   console.log(question_id);
 
@@ -174,3 +176,4 @@ export async function get_answer_website(question_id: string) {
     await browser.close();
   }
 }
+  */
