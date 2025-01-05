@@ -5,6 +5,7 @@ import FileInput from "../components/file-input";
 import {
   generate_answer,
   get_answer,
+  get_answer_website,
   upload_image,
 } from "~/server/sparx-solver-server";
 
@@ -45,6 +46,8 @@ export default function Page() {
     Question: string;
     ReadableTitle: string;
   } | null>(null);
+
+  const [retry_side, set_retry_side] = useState(0); // 0 is fetch from website, 1 is dynamic
 
   useEffect(() => {
     const handleMessage = (event: {
@@ -125,46 +128,90 @@ export default function Page() {
                       console.log("STAGE 2");
                       console.log(generate_response);
 
-                      get_answer(
-                        temp_device_id,
-                        generate_response.questionID ??
-                          generate_response.questionIDStr,
-                      )
-                        .then(
-                          (get_response: {
-                            WebSolution: {
-                              ContentInfo: {
-                                Answer: string;
-                                AnswerImage: unknown;
-                                AnswerOcr: string;
-
-                                Explanation: string;
-                                ExplanationImage: unknown;
-                                ExplanationOcr: string;
-
-                                ImagesTemplates: unknown;
-
-                                Question: string;
-                                ReadableTitle: string;
-                              };
-                            };
-                          }) => {
-                            if (get_response) {
-                              set_response_data(get_response);
-                              set_response_stage(3);
-
-                              console.log("STAGE 3");
-                              console.log(get_response);
-
-                              set_response_answer_data(
-                                get_response.WebSolution.ContentInfo,
-                              );
-                            }
-                          },
+                      if (retry_side == 1) {
+                        get_answer(
+                          temp_device_id,
+                          generate_response.questionID ??
+                            generate_response.questionIDStr,
                         )
-                        .catch((error) => {
-                          console.error(error);
-                        });
+                          .then(
+                            (get_response: {
+                              WebSolution: {
+                                ContentInfo: {
+                                  Answer: string;
+                                  AnswerImage: unknown;
+                                  AnswerOcr: string;
+
+                                  Explanation: string;
+                                  ExplanationImage: unknown;
+                                  ExplanationOcr: string;
+
+                                  ImagesTemplates: unknown;
+
+                                  Question: string;
+                                  ReadableTitle: string;
+                                };
+                              };
+                            }) => {
+                              if (get_response) {
+                                set_response_data(get_response);
+                                set_response_stage(3);
+
+                                console.log("STAGE 3");
+                                console.log(get_response);
+
+                                set_response_answer_data(
+                                  get_response.WebSolution.ContentInfo,
+                                );
+                              }
+                            },
+                          )
+                          .catch((error) => {
+                            console.error(error);
+                          });
+                      } else {
+                        get_answer_website(
+                          generate_response.questionID ??
+                            generate_response.questionIDStr,
+                        )
+                          .then((responseHtmlString) => {
+                            if (responseHtmlString) {
+                              const tempElement = document.createElement("div");
+                              tempElement.innerHTML = responseHtmlString;
+
+                              console.log(tempElement);
+
+                              const answerText = tempElement.querySelector(
+                                '[class^="PCCacheAnswer_cache-answer-wrap"] [class^="AnswerStructure_as-content"]',
+                              )?.textContent;
+                              const explanationText = tempElement.querySelector(
+                                '[class^="PCCacheAnswer_explanationWrap"] [class^="AnswerStructure_as-content"]',
+                              )?.textContent;
+
+                              set_response_data({
+                                WebSolution: {
+                                  ContentInfo: {
+                                    Answer: answerText,
+
+                                    Explanation: explanationText,
+                                  },
+                                },
+                              });
+                              set_response_stage(3);
+                              console.log("STAGE 3");
+
+                              set_response_answer_data({
+                                // @ts-expect-error uhhhh
+                                Answer: answerText,
+                                // @ts-expect-error uhhhh
+                                Explanation: explanationText,
+                              });
+                            }
+                          })
+                          .catch((error) => {
+                            console.error(error);
+                          });
+                      }
                     }
                   },
                 )
@@ -178,7 +225,7 @@ export default function Page() {
           console.error(error);
         });
     }
-  }, [image]);
+  }, [image, retry_side]);
 
   const { setTheme } = useTheme();
 
@@ -254,20 +301,36 @@ export default function Page() {
     );
   } else {
     return (
-      <div className="flex h-screen flex-col">
-        <div className="flex flex-grow flex-col items-center justify-center gap-2">
+      <div className="flex h-screen flex-col items-center justify-center">
+        <div className="flex w-fit flex-grow flex-col items-center justify-center gap-2">
           {/* Pass setImage to the FileInput component */}
           <FileInput image={image} setImage={setImage} />
-          <Button
-            onClick={() => {
-              window.parent.postMessage(
-                { type: "sparx_solver_request_base_64" },
-                "*",
-              );
-            }}
-          >
-            Auto answer (from sparx)
-          </Button>
+          <div className="flex w-full flex-row gap-2">
+            <Button
+              variant={"outline"}
+              onClick={() => {
+                set_retry_side(1);
+                window.parent.postMessage(
+                  { type: "sparx_solver_request_base_64" },
+                  "*",
+                );
+              }}
+            >
+              Auto (API)
+            </Button>
+            <Button
+              className="flex-grow"
+              onClick={() => {
+                set_retry_side(0);
+                window.parent.postMessage(
+                  { type: "sparx_solver_request_base_64" },
+                  "*",
+                );
+              }}
+            >
+              Auto answer (default)
+            </Button>
+          </div>
         </div>
       </div>
     );
